@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#05060d">
+<title>Close Friends Groups | Close Enough</title>
+<meta name="description" content="Project 1 case study, DES 198 Intro to Product Design, UC Berkeley, Fall 2026: multiple color-coded Close Friends groups for Instagram Stories.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#05060d; --bg-2:#0b0d16; --surface:#14161f; --surface-2:#1c1f2a; --pill:#262935;
+    --line:rgba(255,255,255,.08); --line-2:rgba(255,255,255,.14);
+    --ink:#ffffff; --ink-2:#b9bcc8; --ink-3:#7c8091;
+    --blue:#2f6bff; --blue-2:#5b8cff; --violet:#5b2a86; --violet-2:#8b5cf6; --pink:#f0679a;
+    --green:#22c55e; --red:#ef4444; --yellow:#eab308; --gblue:#3b82f6;
+    --mono:'JetBrains Mono', ui-monospace, Menlo, monospace;
+    color-scheme:dark;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth; scroll-padding-top:24px}
+  body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.65 Inter,system-ui,-apple-system,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+  a{color:inherit}
+  ::selection{background:var(--blue);color:#fff}
+
+  /* aurora glow at the top, like the reference app */
+  .aurora{position:absolute;inset:0 0 auto 0;height:720px;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(60% 55% at 15% 0%, rgba(240,103,154,.38), transparent 70%),
+      radial-gradient(55% 60% at 55% -5%, rgba(47,107,255,.55), transparent 70%),
+      radial-gradient(45% 50% at 95% 5%, rgba(139,92,246,.40), transparent 70%),
+      linear-gradient(to bottom, rgba(5,6,13,0) 40%, var(--bg) 100%);}
+  .aurora::after{content:"";position:absolute;inset:0;opacity:.18;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");}
+
+  .shell{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 16px;display:grid;grid-template-columns:200px minmax(0,1fr);gap:56px}
+
+  /* side nav (desktop) */
+  aside{position:sticky;top:0;align-self:start;padding:40px 0;height:100vh}
+  .brand{font-weight:800;letter-spacing:-.02em;font-size:20px;display:flex;align-items:center;gap:10px;margin-bottom:32px}
+  .dots{display:inline-flex;gap:3px}
+  .dots i{width:8px;height:8px;border-radius:50%;display:block}
+  aside nav{display:flex;flex-direction:column;gap:4px}
+  aside nav a{font-size:14px;color:var(--ink-3);text-decoration:none;padding:8px 14px;border-radius:999px;display:flex;gap:10px;transition:background .2s,color .2s}
+  aside nav a span{font-family:var(--mono);font-size:11px;padding-top:3px;width:18px;opacity:.7}
+  aside nav a:hover{color:var(--ink)}
+  aside nav a.on{color:var(--ink);background:var(--surface-2)}
+
+  /* floating glass pill nav (mobile), modeled on the reference tab bar */
+  @media (max-width:900px){
+    .shell{grid-template-columns:1fr;gap:0}
+    aside{position:fixed;top:auto;bottom:16px;left:16px;right:16px;height:auto;padding:6px;z-index:20;
+      background:rgba(28,31,42,.72);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);
+      border:1px solid var(--line-2);border-radius:999px;box-shadow:0 10px 40px rgba(0,0,0,.5)}
+    .brand{display:none}
+    aside nav{flex-direction:row;gap:2px;overflow-x:auto;scrollbar-width:none}
+    aside nav::-webkit-scrollbar{display:none}
+    aside nav a{white-space:nowrap;padding:10px 14px}
+    aside nav a span{display:none}
+    main{padding-bottom:96px}
+  }
+
+  main{min-width:0;max-width:840px}
+  .prose{max-width:660px}
+
+  /* hero */
+  .hero{padding:56px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--ink-2)}
+  h1{font-size:clamp(38px,6.4vw,60px);line-height:1.02;letter-spacing:-.035em;margin:14px 0 18px;font-weight:800}
+  .lede{font-size:20px;color:var(--ink-2);margin:0 0 28px;max-width:640px}
+
+  .meta{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin:32px 0 0;padding:22px 24px;background:rgba(20,22,31,.6);border:1px solid var(--line);border-radius:24px;backdrop-filter:blur(8px)}
+  .meta h6{margin:0 0 4px;font-size:11px;font-family:var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+  .meta p{margin:0;font-size:14px;color:var(--ink)}
+  @media (max-width:640px){.meta{grid-template-columns:1fr 1fr}}
+
+  /* sections */
+  .part{padding:64px 0;border-top:1px solid var(--line)}
+  .partlabel{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);padding:6px 12px;border-radius:999px;margin-bottom:16px}
+  .partlabel::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--c,var(--blue))}
+  h2{font-size:clamp(26px,3.8vw,36px);line-height:1.15;letter-spacing:-.025em;margin:0 0 18px;font-weight:800}
+  h3{font-size:20px;letter-spacing:-.015em;margin:40px 0 10px;font-weight:700}
+  h4{font-weight:700}
+  p{margin:0 0 14px;color:var(--ink-2)}
+  strong{color:var(--ink)}
+  em{color:var(--ink)}
+  ul.clean{padding-left:20px;color:var(--ink-2);margin:0 0 14px}
+  ul.clean li{margin-bottom:8px}
+  ul.clean li::marker{color:var(--ink-3)}
+
+  /* media */
+  figure{margin:24px 0}
+  figure img,figure video{width:100%;display:block;border-radius:24px;border:1px solid var(--line);background:var(--surface)}
+  figcaption{font-size:14px;color:var(--ink-3);margin-top:10px}
+  figcaption b{color:var(--ink);font-weight:600}
+  .ph{border:1.5px dashed var(--line-2);border-radius:24px;background:var(--bg-2);min-height:220px;display:flex;flex-direction:column;gap:8px;align-items:center;justify-content:center;text-align:center;padding:20px;color:var(--ink-3);font-size:14px}
+  .ph.tall{min-height:380px}
+  .ph code{font-family:var(--mono);font-size:12px;background:var(--surface-2);color:var(--ink-2);padding:2px 8px;border-radius:999px}
+
+  /* buttons */
+  .btns{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0 0}
+  .btn{display:inline-flex;align-items:center;gap:8px;text-decoration:none;padding:14px 24px;border-radius:999px;font-size:16px;font-weight:600;color:#fff;
+    background:linear-gradient(135deg,#1d4dff 0%,var(--blue-2) 100%);box-shadow:0 8px 30px rgba(47,107,255,.35)}
+  .btn.ghost{background:var(--pill);box-shadow:none}
+
+  /* stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:24px 0}
+  .stat{background:linear-gradient(160deg,color-mix(in srgb,var(--c) 22%,transparent),var(--surface) 60%);border:1px solid var(--line);border-radius:22px;padding:18px}
+  .stat b{display:block;font-size:30px;letter-spacing:-.02em;line-height:1;font-weight:800}
+  .stat span{display:block;font-size:14px;color:var(--ink-2);margin-top:10px;line-height:1.45}
+  @media (max-width:700px){.stats{grid-template-columns:1fr !important}}
+
+  /* cards */
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:20px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+  @media (max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+  .card{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:20px}
+  .card h4{margin:0 0 6px;font-size:16px}
+  .card p{font-size:15px;margin:0}
+  .label{display:inline-block;font-family:var(--mono);font-size:11px;letter-spacing:.06em;text-transform:uppercase;padding:4px 10px;border-radius:999px;margin-bottom:12px;background:var(--pill);color:var(--ink-2)}
+  .label.kept{background:rgba(34,197,94,.15);color:#6ee7a0}
+  .label.dropped{background:rgba(239,68,68,.15);color:#fca5a5}
+
+  /* statement card, styled after the reference's violet promo card */
+  .statement{margin:24px 0 8px;padding:26px 28px;border-radius:26px;background:linear-gradient(150deg,#4a2378 0%,#2d1752 100%);border:1px solid rgba(255,255,255,.08)}
+  .statement .k{display:inline-flex;align-items:center;gap:8px;font-size:13px;color:#e9ddff;background:rgba(255,255,255,.1);padding:6px 12px;border-radius:999px;margin-bottom:14px}
+  .statement .k::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--yellow)}
+  .statement p{margin:0;font-size:clamp(20px,2.6vw,25px);line-height:1.3;color:#fff;font-weight:700;letter-spacing:-.015em}
+  .statement p span{color:#d4c3f7}
+
+  /* quotes */
+  blockquote{margin:16px 0;padding:18px 22px;border-radius:22px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c,var(--blue));font-size:18px;color:var(--ink);line-height:1.5}
+  blockquote cite{display:block;font-style:normal;font-size:12px;color:var(--ink-3);margin-top:8px;font-family:var(--mono)}
+
+  /* tables */
+  .scroll{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:4px 18px;margin:14px 0}
+  .table{width:100%;border-collapse:collapse;font-size:15px}
+  .table th,.table td{text-align:left;padding:13px 12px 13px 0;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+  .table tr:last-child td{border-bottom:0}
+  .table td strong{color:var(--ink)}
+  .table th{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);font-weight:500}
+  .table .who{font-size:12px;color:var(--ink-3);display:block}
+  .done{color:#6ee7a0;font-weight:600}
+  .park{color:var(--ink-3);font-weight:600}
+  .round{font-family:var(--mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2);margin:32px 0 0}
+
+  /* before / after */
+  .ba{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:20px 0}
+  .ba > div{border-radius:22px;padding:20px;border:1px solid var(--line)}
+  .ba .before{background:linear-gradient(160deg,rgba(239,68,68,.16),var(--surface) 65%)}
+  .ba .after{background:linear-gradient(160deg,rgba(34,197,94,.16),var(--surface) 65%)}
+  .ba h4{margin:0 0 10px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;color:var(--ink-2)}
+  .ba ul{margin:0;padding-left:18px;font-size:15px;color:var(--ink-2)}
+  .ba li{margin-bottom:7px}
+  @media (max-width:700px){.ba{grid-template-columns:1fr}}
+
+  /* group chips */
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:6px 14px 6px 6px;border-radius:999px;font-size:14px;font-weight:600;color:#fff;margin:0 6px 8px 0}
+  .chip i{width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.25);display:inline-flex;align-items:center;justify-content:center;font-style:normal;font-size:12px}
+
+  /* flows */
+  .flowcard{background:var(--surface);border:1px solid var(--line);border-radius:22px;padding:16px}
+  .flowcard h4{margin:0;font-size:16px}
+  .flowline{font-family:var(--mono);font-size:12px;color:var(--ink-3);margin:4px 0 12px}
+  .flowcard .ph{min-height:200px;border-radius:16px}
+  .flowcard figure{margin:0}
+  .flowcard figure video{border-radius:16px}
+
+  /* product stage: device shown at a natural size, centered on a quiet panel */
+  figure.stage{background:var(--bg-2);border:1px solid var(--line);border-radius:28px;padding:40px 24px 36px;display:flex;flex-direction:column;align-items:center}
+  figure.stage video,figure.stage img{border:0;border-radius:0;background:none;height:auto}
+  figure.stage video{width:min(300px,78vw)}
+  figure.stage.pair img{width:100%;max-width:520px}
+  figure.stage.wide img{width:100%;max-width:760px}
+  figure.stage figcaption{align-self:stretch;text-align:center;margin-top:20px}
+  .pairlabels{display:flex;justify-content:space-around;width:100%;max-width:520px;font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-top:14px}
+  .flowcard figure{background:var(--bg-2);border-radius:16px;padding:14px 10px;display:flex;justify-content:center}
+  .flowcard figure video{border:0;border-radius:0;background:none;width:100%;max-width:220px}
+  .gap{background:rgba(234,179,8,.10);border:1px solid rgba(234,179,8,.35);border-radius:16px;padding:12px 16px;font-size:14px;color:#f5d76e;margin:18px 0}
+  .gap b{color:#fde68a}
+
+  footer{border-top:1px solid var(--line);padding:40px 0 72px;color:var(--ink-3);font-size:14px}
+  footer strong{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="aurora" aria-hidden="true"></div>
+<div class="shell">
+
+<aside>
+  <div class="brand"><span class="dots"><i style="background:var(--green)"></i><i style="background:var(--red)"></i><i style="background:var(--yellow)"></i><i style="background:var(--gblue)"></i></span>Close Enough</div>
+  <nav id="nav">
+    <a href="#overview"><span>01</span>Overview</a>
+    <a href="#solution"><span>02</span>Solution</a>
+    <a href="#flows"><span>03</span>Core flows</a>
+    <a href="#research"><span>04</span>Research</a>
+    <a href="#explorations"><span>05</span>Explorations</a>
+    <a href="#testing"><span>06</span>Prototyping &amp; testing</a>
+    <a href="#decisions"><span>07</span>Design decisions</a>
+    <a href="#constraints"><span>08</span>Constraints</a>
+    <a href="#reflections"><span>09</span>Reflections</a>
+  </nav>
+</aside>
+
+<main>
+
+  <!-- 01 OVERVIEW -->
+  <header class="hero" id="overview">
+    <div class="eyebrow">01 · Overview · DES 198 Project 1</div>
+    <h1>Close Friends Groups for Instagram Stories</h1>
+    <p class="lede">Instagram gives you one Close Friends list for every circle in your life. We added named, color-coded groups, so you can share a story with just your family or just your club in one tap.</p>
+    <div class="vid tall" data-src="assets/demo.mp4" data-poster="assets/demo-poster.jpg" data-label="Full demo, under a minute"></div>
+    <div class="btns">
+      <a class="btn" href="https://www.figma.com/make/onxSTz91mv16c0IsxB0xXY/Clickable-Instagram-Stories-Prototype" target="_blank" rel="noopener">Try the prototype ↗</a>
+      <a class="btn ghost" href="#research">See the research</a>
+    </div>
+    <div class="meta">
+      <div><h6>Team</h6><p>Novia Li, Olivia Chen, Shane Rollin, Andy Chen, Elon Hufana</p></div>
+      <div><h6>Role</h6><p>Research, product design, prototyping</p></div>
+      <div><h6>Timeline</h6><p>3 weeks, Oct 2026</p></div>
+      <div><h6>Tools</h6><p>Figma, Figma Make, Claude</p></div>
+    </div>
+  </header>
+
+  <!-- 02 -->
+  <section class="part" id="solution" style="--c:var(--green)">
+    <div class="partlabel">02 · Solution</div>
+    <h2>Pick a colored group before you post, and the whole screen tells you where it's going</h2>
+    <div class="prose">
+      <p>Close Friends becomes the first of several groups. Each has a <strong>name, a color, and an icon</strong> that follow the story from the picker to the send button to the confirmation.</p>
+      <div>
+        <span class="chip" style="background:var(--green)"><i>★</i>Close Friends</span>
+        <span class="chip" style="background:var(--red)"><i>♥</i>Family</span>
+        <span class="chip" style="background:var(--yellow)"><i>★</i>Close Enough</span>
+        <span class="chip" style="background:var(--gblue)"><i>✦</i>Club</span>
+      </div>
+    </div>
+    <figure class="stage wide">
+      <div class="ph" data-src="assets/solution-screens.jpg">Key screens<br><code>assets/solution-screens.jpg</code></div>
+      <figcaption><b>Left to right:</b> pick a group from "Share to," the pill turns that group's color, a confirmation toast on Home, and the posted story, where only Novia can see who it went to.</figcaption>
+    </figure>
+  </section>
+
+  <!-- 03 -->
+  <section class="part" id="flows" style="--c:var(--blue-2)">
+    <div class="partlabel">03 · Core flows</div>
+    <h2>Three flows: make a group, edit a group, share to a group</h2>
+    <div class="grid3">
+      <div class="flowcard">
+        <h4>Make a group</h4>
+        <p class="flowline">Groups → + New → name, color, icon, people → Create</p>
+        <div class="vid" data-src="assets/flow-create.mp4" data-label="Flow A"></div>
+      </div>
+      <div class="flowcard">
+        <h4>Edit a group</h4>
+        <p class="flowline">Groups → Close Friends → Add from Suggested → Save</p>
+        <div class="vid" data-src="assets/flow-person.mp4" data-label="Flow B"></div>
+      </div>
+      <div class="flowcard">
+        <h4>Share to a group</h4>
+        <p class="flowline">Your story → audience pill → Close Enough → Send</p>
+        <div class="vid" data-src="assets/flow-share.mp4" data-label="Flow C"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 04 -->
+  <section class="part" id="research" style="--c:var(--pink)">
+    <div class="partlabel">04 · Research</div>
+    <h2>No one held back over their audience; they had already moved it to spam accounts and DMs</h2>
+    <div class="prose">
+      <p><strong>14 interviews</strong>, about 3 per teammate, with Instagram users we know: mostly students, plus family. Same 10 questions, about real past behavior. We never described our idea.</p>
+    </div>
+
+    <div class="stats" style="grid-template-columns:repeat(3,1fr)">
+      <div class="stat" style="--c:var(--green)"><b>11 of 14</b><span>update Close Friends every 3 months or less, or have no list</span></div>
+      <div class="stat" style="--c:var(--red)"><b>7 of 14</b><span>named two or more circles they'd share differently with</span></div>
+      <div class="stat" style="--c:var(--yellow)"><b>10 of 14</b><span>check who viewed or liked their story</span></div>
+    </div>
+
+    <h3>What surprised us: the sorting happens before Instagram</h3>
+    <p>We expected hesitation. Instead, people only post to their main story what already fits everyone, and route the rest elsewhere.</p>
+    <blockquote style="--c:var(--gblue)">"No, I don't mind seeing where it lands with my whole following."<cite>Participant who posts daily</cite></blockquote>
+    <blockquote style="--c:var(--red)">"If I want to share something more privately, I will send it to my friends directly."<cite>Participant, private account</cite></blockquote>
+
+    <h3>Circles exist, but they live in workarounds</h3>
+    <p>All 3 people Shane interviewed keep a main account and a second "spam" account, and are much more open on the spam one. Others DM friends directly, or post only to Close Friends.</p>
+    <div class="scroll">
+    <table class="table">
+      <tr><th>Who</th><th>Circles they'd separate</th></tr>
+      <tr><td>Novia's P3</td><td>Sorority · mom and her friends · my friends · extended family</td></tr>
+      <tr><td>Olivia's P1</td><td>Art vs. nature friends · high school vs. college</td></tr>
+      <tr><td>Olivia's P2</td><td>College classmates, for posts that need context</td></tr>
+      <tr><td>Novia's P1, P2</td><td>Club · roommate / sisters · best friends</td></tr>
+      <tr><td>EG, DM</td><td>Close friends · romantic interests / coworkers · acquaintances</td></tr>
+      <tr><td>PR, EC, DR</td><td>Already split: main account vs. spam account</td></tr>
+      <tr><td>RJ, Andy's P1, P2</td><td>No need for groups</td></tr>
+    </table>
+    </div>
+
+    <h3>Lists go stale, and being on one sends a signal</h3>
+    <p>One participant hadn't updated Close Friends in almost two years. She also described noticing whose lists she was and wasn't on:</p>
+    <blockquote style="--c:var(--yellow)">"…oh, why I'm not your close friends…"<cite>Participant, private account</cite></blockquote>
+    <p><strong>What this changed:</strong> groups had to be quick to build and private to the poster. See Design decisions.</p>
+
+    <h3>Competitors split audiences at different moments</h3>
+    <div class="scroll">
+    <table class="table">
+      <tr><th>App</th><th>Audience control</th><th>What we took from it</th></tr>
+      <tr><td><strong>Snapchat</strong></td><td>Private Stories with hand-picked friends</td><td>Named private audiences work</td></tr>
+      <tr><td><strong>WhatsApp</strong></td><td>Status: all contacts, all except, or only share with</td><td>It's a setting, not a choice when posting</td></tr>
+      <tr><td><strong>BeReal</strong></td><td>Posts go to your friends</td><td>Shrinks the audience instead of splitting it</td></tr>
+      <tr><td><strong>Marco Polo</strong></td><td>Video messages to people or groups</td><td>Private, but messaging, not a story</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <!-- 05 -->
+  <section class="part" id="explorations" style="--c:var(--violet-2)">
+    <div class="partlabel">05 · Explorations</div>
+    <h2>We dropped the one-star-for-everything picker and the Close Friends dropdown</h2>
+    <div class="grid3">
+      <div class="card"><span class="label dropped">Dropped</span><h4>Dropdown inside Close Friends</h4><p>Our lo-fi added a group switcher to the existing screen. It hid every other group behind one menu.</p></div>
+      <div class="card"><span class="label dropped">Dropped</span><h4>Same green star for every group</h4><p>V2 labeled groups by name only. Critique showed it made the wrong group too easy to pick.</p></div>
+      <div class="card"><span class="label kept">Kept</span><h4>Picker sheet in the story editor</h4><p>Choosing the audience where you post, not in Settings, survived every version.</p></div>
+    </div>
+    <figure>
+      <div class="ph" data-src="assets/lofi-flow.png">Lo-fi flow<br><code>assets/lofi-flow.png</code></div>
+      <figcaption><b>Lo-fi, version 1.</b> Notice the dropdown and + on the Close Friends screen; we replaced both with a Groups overview in V3.</figcaption>
+    </figure>
+    <h3>Left out on purpose</h3>
+    <p>Classmates suggested screenshot alerts and searching your viewers. 10 of 14 participants do check viewers, but both are about <em>after</em> posting. We kept scope on choosing the audience <em>before</em>.</p>
+    <h3>How our question narrowed</h3>
+    <p>"Help users personalize the stories they share" was too broad. After interviews, it became:</p>
+    <div class="statement">
+      <span class="k">Design statement</span>
+      <p>How might we help Instagram users feel comfortable sharing authentically with different social circles, <span>as measured by frequency of posts to labeled groups?</span></p>
+    </div>
+  </section>
+
+  <!-- 06 -->
+  <section class="part" id="testing" style="--c:var(--red)">
+    <div class="partlabel">06 · Prototyping &amp; testing</div>
+    <h2>Critique caught 11 issues; we changed 9 and parked 2</h2>
+
+    <div class="ba">
+      <div class="before"><h4>What broke in V2</h4><ul>
+        <li>Every group looked the same: one green star.</li>
+        <li>Settings opened straight into Close Friends, hiding the rest.</li>
+        <li>Adding people meant searching one by one.</li>
+        <li>No way to see which groups one friend was in.</li>
+        <li>Small, tightly packed tap targets.</li>
+      </ul></div>
+      <div class="after"><h4>What we changed in V3</h4><ul>
+        <li>A color and icon per group, on every surface.</li>
+        <li>A Groups overview listing all groups.</li>
+        <li>A Suggested section with one-tap Add.</li>
+        <li>A People tab with per-person group toggles.</li>
+        <li>44pt tap targets, 56pt rows, 8pt spacing.</li>
+      </ul></div>
+    </div>
+    <figure class="stage pair">
+      <div class="ph" data-src="assets/v2-v3.jpg">V2 and V3, side by side<br><code>assets/v2-v3.jpg</code></div>
+      <div class="pairlabels"><span>V2</span><span>V3</span></div>
+      <figcaption><b>New group, before and after.</b> V2 (left) had only a name and a long list of initials. V3 (right) adds a live preview of the story pill, a color and icon, and Suggested people first.</figcaption>
+    </figure>
+
+    <div class="round">Round 1 · Oct 8, critique of our proposal</div>
+    <div class="scroll">
+    <table class="table">
+      <tr><th>From</th><th>Feedback</th><th>What we did</th></tr>
+      <tr><td>Julia<span class="who">Facilitator</span></td><td>Close the gap between problem and solution; let research carry the solution.</td><td><span class="done">Changed.</span> Interviewed 14 people before designing further; rewrote our statement.</td></tr>
+      <tr><td>Classmate</td><td>Screenshot alerts, like Snapchat.</td><td><span class="park">Parked.</span> After-posting, out of scope.</td></tr>
+      <tr><td>Classmate</td><td>Search your viewer list.</td><td><span class="park">Parked.</span> Real interest (10 of 14), separate feature.</td></tr>
+    </table>
+    </div>
+
+    <div class="round">Round 2 · Oct 22, critique of V2</div>
+    <div class="scroll">
+    <table class="table">
+      <tr><th>From</th><th>Feedback</th><th>What we did</th></tr>
+      <tr><td>Julia &amp; Jennifer<span class="who">Facilitators</span></td><td>Use Instagram's existing "Suggested" feature for inspiration.</td><td><span class="done">Changed.</span> Groups are built from Suggested.</td></tr>
+      <tr><td>Julia &amp; Jennifer<span class="who">Facilitators</span></td><td>Consider length and spacing when pressing buttons.</td><td><span class="done">Changed.</span> Tap targets and spacing rules applied everywhere.</td></tr>
+      <tr><td>Julia &amp; Jennifer<span class="who">Facilitators</span></td><td>Update the Close Friends menu, since it already exists.</td><td><span class="done">Changed.</span> Close Friends is now the default group.</td></tr>
+      <tr><td>Facilitators, Andy, Shane</td><td>A different color for each group.</td><td><span class="done">Changed.</span> Color and icon per group.</td></tr>
+      <tr><td>Shane<span class="who">Team</span></td><td>Red heart for Family, yellow star for Close Enough, so you don't post to the wrong group.</td><td><span class="done">Changed.</span> These became our demo groups.</td></tr>
+      <tr><td>Andy<span class="who">Team</span></td><td>Pick a person first, then edit their groups.</td><td><span class="done">Changed.</span> People tab.</td></tr>
+      <tr><td>Andy<span class="who">Team</span></td><td>Settings should show all groups, not open Close Friends.</td><td><span class="done">Changed.</span> Groups overview.</td></tr>
+      <tr><td>Andy<span class="who">Team</span></td><td>Instagram's design system is public.</td><td><span class="done">Used</span> for buttons, rows, and icons.</td></tr>
+    </table>
+    </div>
+
+    <h3>Usability test on V3: "it makes sense, I want to use it"</h3>
+    <p>Testers said the flow made sense and that they wanted to start using it right away.</p>
+    <p><strong>What didn't land:</strong> groups don't fully replace spam accounts. People keep a second account for different reasons, and part of its appeal is that it stays exclusive. That is the open question we'd test next (see Reflections).</p>
+  </section>
+
+  <!-- 07 -->
+  <section class="part" id="decisions" style="--c:var(--yellow)">
+    <div class="partlabel">07 · Design decisions</div>
+    <h2>Four decisions, each with what we turned down</h2>
+    <div class="scroll">
+    <table class="table">
+      <tr><th>We chose</th><th>We turned down</th><th>Why</th></tr>
+      <tr><td><strong>Color and icon per group</strong></td><td>One green star for all</td><td>A name alone is easy to misread when you're posting fast.</td></tr>
+      <tr><td><strong>Labels only the poster sees</strong></td><td>Telling viewers their group</td><td>Being on, or off, someone's list stings. Our participant said so unprompted.</td></tr>
+      <tr><td><strong>Groups built from Suggested</strong></td><td>An empty list you search to fill</td><td>11 of 14 rarely update their list. Setup has to take seconds.</td></tr>
+      <tr><td><strong>Close Friends stays the default</strong></td><td>Replacing it with a blank system</td><td>Existing users keep the green star until they want more.</td></tr>
+    </table>
+    </div>
+  </section>
+
+  <!-- 08 -->
+  <section class="part" id="constraints" style="--c:var(--ink-3)">
+    <div class="partlabel">08 · Constraints</div>
+    <h2>Three weeks and 14 people we know</h2>
+    <ul class="clean prose">
+      <li><strong>Time:</strong> three weeks, alongside other classes.</li>
+      <li><strong>Sample:</strong> 14 people from our own networks. The spam-account pattern comes from just 3 of them, all from one interviewer.</li>
+      <li><strong>Methods:</strong> interviews only; no survey.</li>
+      <li><strong>Scope:</strong> the poster's side only. We didn't design or test what viewers see.</li>
+      <li><strong>What isn't real:</strong> a student concept, not affiliated with Instagram. Friends, photos, and Suggested are placeholders, so we couldn't test with anyone's real connections.</li>
+    </ul>
+  </section>
+
+  <!-- 09 -->
+  <section class="part" id="reflections" style="--c:var(--blue)">
+    <div class="partlabel">09 · Reflections</div>
+    <h2>Research changed our goal; next we'd test with spam-account users</h2>
+    <div class="prose">
+      <p><strong>What we'd redo:</strong> run usability tests on V2, not just critique, so test data drove the changes alongside feedback.</p>
+      <p><strong>What we'd test next:</strong> would groups actually replace a second account? And how do viewers feel about being sorted?</p>
+      <h3>Where we used AI</h3>
+      <p>We used Claude to critique our first proposal, suggest interview questions, write the prompts that generated our Figma Make prototype, and draft this page's layout from our notes and interview data.</p>
+      <p><strong>Where we overruled it:</strong> we replaced the feed photo Figma Make chose with our own Memorial Stadium shot, kept Novia's profile at 0 posts instead of a filled grid, and rolled back a Make change that deleted the profile + button, then re-prompted with a smaller, wiring-only request.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p style="margin:0 0 6px"><strong>Close Enough</strong> · Novia Li, Olivia Chen, Shane Rollin, Andy Chen, Elon Hufana</p>
+    <p style="margin:0">DES 198 Intro to Product Design, UC Berkeley, Fall 2026. A student concept, not affiliated with Instagram or Meta.</p>
+  </footer>
+</main>
+</div>
+
+<script>
+  document.querySelectorAll('.ph[data-src]').forEach(function(ph){
+    var img = new Image();
+    img.onload = function(){ img.alt = ph.textContent.split('assets/')[0].trim(); ph.replaceWith(img); };
+    img.src = ph.getAttribute('data-src');
+  });
+  document.querySelectorAll('.vid[data-src]').forEach(function(slot){
+    var src = slot.getAttribute('data-src'), label = slot.getAttribute('data-label') || 'Video';
+    var showPh = function(){
+      slot.className = 'ph' + (slot.classList.contains('tall') ? ' tall' : '');
+      slot.innerHTML = label + ': muted screen recording, under 1 min, under 10 MB<br><code>' + src + '</code>';
+    };
+    fetch(src, {method:'HEAD'}).then(function(r){
+      if(!r.ok) return showPh();
+      var v = document.createElement('video');
+      v.src = src; v.muted = true; v.loop = true; v.autoplay = true; v.controls = false; v.style.cursor = 'pointer'; v.title = 'Tap to pause or play'; v.addEventListener('click', function(){ v.paused ? v.play() : v.pause(); });
+      v.setAttribute('playsinline',''); v.setAttribute('aria-label', label);
+      var poster = slot.getAttribute('data-poster'); if (poster) v.poster = poster;
+      var fig = document.createElement('figure'); if (slot.classList.contains('tall')) fig.className = 'stage'; fig.appendChild(v); slot.replaceWith(fig);
+    }).catch(showPh);
+  });
+  var links = Array.prototype.slice.call(document.querySelectorAll('#nav a'));
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(a){
+          var on = a.getAttribute('href') === '#' + e.target.id;
+          a.classList.toggle('on', on);
+          if (on && window.innerWidth <= 900) { var n = a.parentNode; n.scrollTo({left: a.offsetLeft - (n.clientWidth - a.offsetWidth) / 2, behavior:'smooth'}); }
+        });
+      }
+    });
+  }, {rootMargin:'-35% 0px -60% 0px'});
+  document.querySelectorAll('#overview, section.part').forEach(function(s){ obs.observe(s); });
+</script>
+</body>
+</html>
